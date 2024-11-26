@@ -1,5 +1,6 @@
 version: "3.9" # HOMESTACK
 services:
+
   2fauth:
     image: 2fauth/2fauth:5.4.2
     container_name: 2fauth
@@ -84,7 +85,7 @@ services:
     # (1000:1000 by default)
     user: root
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # - /var/run/docker.sock:/var/run/docker.sock
       - ${APP_DATA_DIR}/authtentik/data/authentik-media:/media
       - ${APP_DATA_DIR}/authtentik/data/authentik-certs:/certs
       - ${APP_DATA_DIR}/authtentik/data/authentik-custom-templates:/templates

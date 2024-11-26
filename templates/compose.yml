@@ -47,10 +47,10 @@ services:
     command: server
     container_name: authentik
     environment:
-      AUTHENTIK_REDIS__HOST: authentik-redis
-      AUTHENTIK_POSTGRESQL__HOST: authentik-db
-      AUTHENTIK_POSTGRESQL__USER: authentik
-      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_REDIS__HOST: redishost
+      AUTHENTIK_POSTGRESQL__HOST: pghost
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_AUTHENTIK_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_AUTHENTIK_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_DB_PASSWORD}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     volumes:
@@ -70,10 +70,10 @@ services:
     command: worker
     container_name: authentik-worker
     environment:
-      AUTHENTIK_REDIS__HOST: redis-host
-      AUTHENTIK_POSTGRESQL__HOST: pg-db
-      AUTHENTIK_POSTGRESQL__USER: authentik
-      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_REDIS__HOST: redishost
+      AUTHENTIK_POSTGRESQL__HOST: pghost
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_AUTHENTIK_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_AUTHENTIK_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_DB_PASSWORD}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     # `user: root` and the docker socket volume are optional.
@@ -95,7 +95,7 @@ services:
       - tipi_main_network
     labels:
       runtipi.managed: true
-  pg-db:
+  pghost:
     container_name: pg
     image: postgres:12-alpine
     restart: unless-stopped

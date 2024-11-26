@@ -133,6 +133,20 @@ services:
     labels:
       runtipi.managed: true
 
+  autobrr:
+    container_name: autobrr
+    image: ghcr.io/autobrr/autobrr:v1.51.1
+    restart: unless-stopped
+    ports:
+      - ${APP_AUTOBRR_PORT}:7474
+    volumes:
+      - ${APP_DATA_DIR}/data/autobrr:/config
+    user: "1000:1000"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - tipi_main_network
+
 networks:
   tipi_main_network:
     name: runtipi_tipi_main_network

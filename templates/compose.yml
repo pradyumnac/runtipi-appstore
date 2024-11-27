@@ -60,8 +60,8 @@ services:
     ports:
       - "${APP_AUTHENTIK_PORT}:9443"
     depends_on:
-      - authentik-db
-      - authentik-redis
+      - pghost
+      - redishost
     networks:
       - tipi_main_network
     
@@ -85,50 +85,13 @@ services:
     # (1000:1000 by default)
     user: root
     volumes:
-      # - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       - ${APP_DATA_DIR}/authtentik/data/authentik-media:/media
       - ${APP_DATA_DIR}/authtentik/data/authentik-certs:/certs
       - ${APP_DATA_DIR}/authtentik/data/authentik-custom-templates:/templates
     depends_on:
-      - authentik-db
-      - authentik-redis
-    networks:
-      - tipi_main_network
-    labels:
-      runtipi.managed: true
-  pghost:
-    container_name: pg
-    image: postgres:12-alpine
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_AUTHENTIK_DB} -U $${POSTGRES_AUTHENTIK_USER}"]
-      start_period: 20s
-      interval: 30s
-      retries: 5
-      timeout: 5s
-    volumes:
-      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
-      - ./pg.init.d:/docker-entrypoint-initdb.d:ro
-    environment:
-      POSTGRES_MULTIPLE_DATABASES: "${POSTGRES_DBS}"
-      POSTGRES_PASSWORD: ${AUTHENTIK_DB_PASSWORD}
-    networks:
-      - tipi_main_network
-    labels:
-      runtipi.managed: true
-  redishost:
-    image: redis:alpine
-    command: --save 60 1 --loglevel warning
-    container_name: redis
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      start_period: 20s
-      interval: 30s
-      retries: 5
-      timeout: 3s
-    volumes:
-      - ${APP_DATA_DIR}/data/redis:/data
+      - pghost
+      - redishost
     networks:
       - tipi_main_network
     labels:
@@ -148,7 +111,51 @@ services:
     networks:
       - tipi_main_network
 
+  pghost:
+    container_name: pg
+    image: postgres:12-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
+      # - postgres_data:/var/lib/postgresql/data
+      - ./pg.init.d:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: "${POSTGRES_DBS}"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - tipi_main_network
+    labels:
+      runtipi.managed: true
+
+  redishost:
+    image: redis:alpine
+    command: --save 60 1 --loglevel warning
+    container_name: redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - ${APP_DATA_DIR}/data/redis:/data
+    networks:
+      - tipi_main_network
+    labels:
+      runtipi.managed: true
+
 networks:
   tipi_main_network:
     name: runtipi_tipi_main_network
     external: true
+
+volumes:
+  postgres_data:
